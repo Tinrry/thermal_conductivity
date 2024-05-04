@@ -16,11 +16,11 @@ print(print_format + 'step 1: finish' + print_format)
 print(print_format + 'step 2: atomsk format poscar to lmp' + print_format)
 if os.path.exists('POSCAR-OO'):
     shutil.rmtree('POSCAR-OO')
-shutil.mkdir("POSCAR-OO")
+os.mkdir("POSCAR-OO")
 shutil.move("POSCAR-00*", "POSCAR-OO/POSCAR-00*")
 if os.path.exists('lmp'):
     shutil.rmtree('lmp')
-shutil.mkdir("lmp")
+os.mkdir("lmp")
 
 for p, d, files in os.walk("POSCAR-OO"):
     for f in files:
