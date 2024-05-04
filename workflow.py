@@ -9,22 +9,22 @@ import threading
 print_format = '==============='
 
 print(print_format + 'step 1: phono3py generate POSCAR' + print_format)
-p1 = subprocess.Popen(["phono3py", "-d", "--dim=\"1 1 1\"", "-c", "POSCAR_BZO_ROTATION"]) # phono3py -d --dim="1 1 1" -c POSCAR_BZO_ROTATION
+p1 = subprocess.Popen(["phono3py", "-d", "--dim=1 1 1", "-c", "POSCAR_BZO_ROTATION"]) # phono3py -d --dim="1 1 1" -c POSCAR_BZO_ROTATION
 p1.wait()
 print(print_format + 'step 1: finish' + print_format)
 
 print(print_format + 'step 2: atomsk format poscar to lmp' + print_format)
-if os.path.exists('POSCAR-OO'):
-    shutil.rmtree('POSCAR-OO')
-os.mkdir("POSCAR-OO")
-shutil.move("POSCAR-00*", "POSCAR-OO/POSCAR-00*")
+if os.path.exists('POSCAR-00'):
+    shutil.rmtree('POSCAR-00')
+os.mkdir("POSCAR-00")
+shutil.move("POSCAR-00*", "POSCAR-00/POSCAR-00*")
 if os.path.exists('lmp'):
     shutil.rmtree('lmp')
 os.mkdir("lmp")
 
-for p, d, files in os.walk("POSCAR-OO"):
+for p, d, files in os.walk("POSCAR-00"):
     for f in files:
-        subprocess.run(["atomsk", "POSCAR-OO/"+f, "lmp/", "lammps"])      # atomsk POSCAR-00/POSCAR-00001 lammps
+        subprocess.run(["atomsk", "POSCAR-00/"+f, "lmp/", "lammps"])      # atomsk POSCAR-00/POSCAR-00001 lammps
 
 print(print_format + 'step 2: finish' + print_format)
 
