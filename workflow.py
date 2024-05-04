@@ -5,6 +5,8 @@ import subprocess
 import fileinput
 import timeit
 import threading
+import glob
+
 
 print_format = '==============='
 
@@ -17,7 +19,10 @@ print(print_format + 'step 2: atomsk format poscar to lmp' + print_format)
 if os.path.exists('POSCAR-00'):
     shutil.rmtree('POSCAR-00')
 os.mkdir("POSCAR-00")
-shutil.move("POSCAR-00*", "POSCAR-00/POSCAR-00*")
+# shutil.move("POSCAR-00*", "POSCAR-00/POSCAR-00*")
+for f in glob.glob(r'POSCAR-00*'):
+    shutil.move(f, "POSCAR-00")
+
 if os.path.exists('lmp'):
     shutil.rmtree('lmp')
 os.mkdir("lmp")
