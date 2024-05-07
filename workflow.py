@@ -7,6 +7,10 @@ import timeit
 import threading
 import glob
 
+"""
+--dim=2 2 1
+--mesh=11 11 11
+"""
 
 print_format = '==============='
 def step_1():
@@ -141,7 +145,7 @@ def step_6():
     # this step will take a long time when set mesh='11 11 11'
     heat = open('heat.txt', 'w')
     heat.flush()
-    run_mode_RTA = ["phono3py", "--fc3", "--fc2", "--dim='1 1 1'", "--mesh='3 3 3'", "--br", "--tmin=10", "--tmax=1000"]
+    run_mode_RTA = ["phono3py", "--fc3", "--fc2", "--dim='1 1 1'", "--mesh='11 11 11'", "--br", "--tmin=10", "--tmax=1000"]
     command_3 = subprocess.Popen([' '.join(run_mode_RTA)], stdout=heat, stderr=heat, shell=True)
     command_3.wait()
     print(print_format + 'step 6: finish' + print_format)

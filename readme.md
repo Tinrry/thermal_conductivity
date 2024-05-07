@@ -7,7 +7,12 @@ POSCAR_BZO_ROTATION
 
 in_template.lammps # 运行自动流程脚本需要
 ## 运行
-python workflow.py
+1. 热导计算，输出heat.txt
+```python workflow.py```
+2. 基于heat.txt，结果展示
+```python heat-plot.py
+```
+![h-p](./img.png)
 
 ## 程序运行的过程解释和说明
 https://www.notion.so/0632b5a9bf9f45d7945525d8d82211b2?pvs=4
