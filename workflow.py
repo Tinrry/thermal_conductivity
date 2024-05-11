@@ -6,55 +6,78 @@ import fileinput
 import timeit
 import threading
 import glob
-
+import argparse
+import json
 """
 --dim=2 2 1
 --mesh=11 11 11
 """
 
 print_format = '==============='
-def step_1():
+
+def step_1(config, dim, mesh):
     print(print_format + 'step 1: phono3py generate POSCAR' + print_format)
-    p1 = subprocess.Popen(["phono3py", "-d", "--dim=1 1 1", "-c", "POSCAR_BZO_ROTATION"], shell=True) # phono3py -d --dim="1 1 1" -c POSCAR_BZO_ROTATION
+    POSCAR = config['properties']['phono3py']['POSCAR']
+    save_base = config['save']['path']
+    poscar_00 = os.path.join(save_base, 'POSCAR-00')
+
+    command_1 = ["phono3py", "-d", f"--dim={dim}", "-c", POSCAR]
+    p1 = subprocess.Popen(' '.join(command_1), shell=True) # phono3py -d --dim="1 1 1" -c POSCAR_BZO_ROTATION
     p1.wait()
-    if os.path.exists('POSCAR-00'):
-        shutil.rmtree('POSCAR-00')
-    os.mkdir("POSCAR-00")
+    if os.path.exists(poscar_00):
+        shutil.rmtree(poscar_00)
+    os.mkdir(poscar_00)
     # shutil.move("POSCAR-00*", "POSCAR-00/POSCAR-00*")
     for f in glob.glob(r'POSCAR-00*'):
-        shutil.move(f, "POSCAR-00")
+        shutil.move(f, poscar_00)
     print(print_format + 'step 1: finish' + print_format)
 
-def step_2():
-    print(print_format + 'step 2: atomsk format poscar to lmp' + print_format)
-    if os.path.exists('bzo-example/lmp'):
-        shutil.rmtree('bzo-example/lmp')
-    os.mkdir("bzo-example/lmp")
 
-    for p, d, files in os.walk("POSCAR-00"):
+def step_2(config, dim, mesh):
+    print(print_format + 'step 2: atomsk format poscar to lmp' + print_format)
+    save_base = config['save']['path']
+    lmp_dir = os.path.join(save_base, 'lmp')
+    poscar_00 = os.path.join(save_base, 'POSCAR-00')
+
+    if os.path.exists(lmp_dir):
+        shutil.rmtree(lmp_dir)
+    os.mkdir(lmp_dir)
+
+    if not os.path.exists(poscar_00):
+        print('POSCAR-00 is not found.')
+        return
+
+    for p, d, files in os.walk(poscar_00):
         for f in files:
-            p1 = subprocess.Popen(["atomsk", "POSCAR-00/"+f, "lammps"], shell=True)      # atomsk POSCAR-00/POSCAR-00001 lammps
+            full_f = os.path.join(poscar_00, f)
+            p1 = subprocess.Popen(["atomsk", full_f, "lammps"], shell=True)      # atomsk POSCAR-00/POSCAR-00001 lammps
             p1.wait()
-    for f in glob.glob(r'POSCAR-00/*lmp'):
-        shutil.move(f, "bzo-example/lmp")
+    
+    for f in glob.glob(f'{poscar_00}/*lmp'):
+        shutil.move(f, lmp_dir)
     print(print_format + 'step 2: finish' + print_format)
 
-def step_3():
+def step_3(config, dim, mesh):
     print(print_format + 'step 3: configure in.lammps' + print_format)
+    save_base = config['save']['path']
+    lmp_dir = os.path.join(save_base, 'lmp')
+    in_f = config['properties']['in.lammps']
+
+
     # in_f = 'in_00002.lammps'
-    for p, d, files in os.walk('bzo-example/lmp'):
+    for p, d, files in os.walk(lmp_dir):
         for f in files:
             if f.endswith('.lmp'):
                 base_name = 'POSCAR-00'
                 index = f.split('.')[0].replace(base_name, '')
                 # index = '001'
                 try:
-                    shutil.copy("in_template.lammps", f"bzo-example/lmp/in-00{index}.lammps")
+                    shutil.copy(in_f, f"{lmp_dir}/in-00{index}.lammps")
                 except:
                     print("in_template.lammps not found")
 
     # generate in.lammps for deepmd
-    for p, d, files in os.walk("bzo-example/lmp"):
+    for p, d, files in os.walk(lmp_dir):
         for f in files:
             if f.endswith('.lammps'):
                 base_name='in-00'
@@ -63,23 +86,23 @@ def step_3():
                 # configure read_data and write_dump
                 old_tag = "<index>"
                 new_tag = index
-                with fileinput.input(os.path.join('bzo-example/lmp', f), inplace=True) as f_handle:
+                with fileinput.input(os.path.join(lmp_dir, f), inplace=True) as f_handle:
                     for line in f_handle:
                         print(line.replace(old_tag, new_tag), end='')
 
     print(print_format + 'step 3: finish' + print_format)
 
 # run deepmd lmp in lmp files , run this command is need wait for a while time. count
-def mpi_run():
+def mpi_run(lmp_dir):
     start_time = timeit.default_timer()
 
     count = 0
-    for p, d, files in os.walk("bzo-example/lmp"):
+    for p, d, files in os.walk(lmp_dir):
         for f in files:
             if f.endswith('.lammps'):
                 count += 1
                 index = f.split('.')[0].replace('in-', '')
-                command_1 = ["mpirun", "-n", "10", "lmp", "-in", f"lmp/{f}", f">lmp-{index}.out", f"2>lmp-{index}.err"]  # mpirun -n 10 lmp -in in-00002.lammps >lmp-00002.out 2>lmp-00002.err
+                command_1 = ["mpirun", "-n", "10", "lmp", "-in", f"{lmp_dir}/{f}", f">lmp-{index}.out", f"2>lmp-{index}.err"]  # mpirun -n 10 lmp -in in-00002.lammps >lmp-00002.out 2>lmp-00002.err
                 # print(' '.join(command_1))
                 p = subprocess.Popen([' '.join(command_1)], shell=True)  # mpirun -n 10 lmp -in in-00002.lammps >lmp-00002.out 2>lmp-00002.err
                 p.wait()
@@ -89,9 +112,12 @@ def mpi_run():
     if count != 0:
         print('Executed %s times per sample.' % (end_time - start_time) / count)
 
-def step_4():
+def step_4(config, dim, mesh):
+    save_base = config['save']['path']
+    lmp_dir = os.path.join(save_base, 'lmp')
+
     print(print_format + 'step 4: run lmp' + print_format)
-    t = threading.Thread(target=mpi_run)
+    t = threading.Thread(target=mpi_run, args=(lmp_dir))
     t.start()
     t.join()
     print(print_format + 'step 4: finish' + print_format)
@@ -125,19 +151,29 @@ def write_xml(fxfyfz, xml_file):
         f.write('       </varray>\n')
         f.write('   </calculation>\n')
         f.write('</modeling>\n')
-def step_5():
+
+
+def step_5(config, dim, mesh):
     print(print_format + 'step 5: convert dump to xml' + print_format)
-    for p, d, files in os.walk("output"):
+    save_base = config['save']['path']
+    # the command in step_4 will generate dump file in output working directory, and we need to convert it to xml file
+    xml_dir = os.path.join(save_base, 'output')
+    dump_dir = 'output'
+    for p, d, files in os.walk(dump_dir):
         for f in files:
             if f.endswith('.dump'):
-                dump_file = os.path.join('output', f)
-                xml_file = os.path.join('output', f.replace('.dump', '.xml'))
+                dump_file = os.path.join(dump_dir, f)
+                xml_file = os.path.join(xml_dir, f.replace('.dump', '.xml'))
                 fxfyfz = read_dump(dump_file)
                 write_xml(fxfyfz, xml_file)
     print(print_format + 'step 5: finish' + print_format)
 
-def step_6():
+def step_6(config, dim, mesh ):
+    save_base = config['save']['path']
+
     print(print_format + 'step 6: phono3py generate thermal conductivity' + print_format)
+    os.chdir(save_base)
+
     command_1 = subprocess.Popen(["phono3py", "--cf3", "output/*.xml"], shell=True)
     command_1.wait()
     command_2 = subprocess.Popen(["phono3py", "--sym-fc"], shell=True)
@@ -145,18 +181,35 @@ def step_6():
     # this step will take a long time when set mesh='11 11 11'
     heat = open('heat.txt', 'w')
     heat.flush()
-    run_mode_RTA = ["phono3py", "--fc3", "--fc2", "--dim='1 1 1'", "--mesh='11 11 11'", "--br", "--tmin=10", "--tmax=1000"]
+    run_mode_RTA = ["phono3py", "--fc3", "--fc2", f"--dim={dim}", f"--mesh={mesh}", "--br", "--tmin=10", "--tmax=1000"]
     command_3 = subprocess.Popen([' '.join(run_mode_RTA)], stdout=heat, stderr=heat, shell=True)
     command_3.wait()
     print(print_format + 'step 6: finish' + print_format)
 
 
 
+def DAG(config, dim, mesh):
+    step_1(config, dim, mesh)
+    step_2(config, dim, mesh)
+    step_3(config, dim, mesh)
+    step_4(config, dim, mesh)
+    step_5(config, dim, mesh)
+    step_6(config, dim, mesh)
+
+    
 if __name__ == '__main__':
-    step_1()
-    step_2()
-    step_3()
-    step_4()
-    step_5()
-    step_6()
+    parser = argparse.ArgumentParser(description='workflow for thermal conductivity.')
+
+    parser.add_argument('-c', '--configure', required=True, help='POSACR file name')
+    parser.add_argument('--dim', type=str, default='2 2 1', help='dim')
+    parser.add_argument('--mesh', type=str, default='11 11 11', help='mesh')
+    args = parser.parse_args()
+
+    f_config = open(args.configure, 'r')
+    config = json.load(f_config)
+    # this config give you work directory, *.pb, POSCAR_BZO_ROTATION
+    # worker(config, dpcal, logger)
+    DAG(config, args.dim, args.mesh)
     print(print_format + 'workflow: done.' + print_format)
+
+# python workflow.py -c config.json --dim='2 2 1' --mesh='11 11 11'

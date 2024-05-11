@@ -1,0 +1,17 @@
+{   
+    "geometry": "POSCAR_BZO_ROTATION",
+    "properties":{
+        "phonon3py":{
+            "model":"graph18-compress0.pb",
+            "POSCAR":"POSCAR_BZO_ROTATION",
+            "in.lammps":"in_template.lammps",
+            "arguments":{
+                "dim": "2 2 1",
+                "mesh": "11 11 11"
+            }
+        }
+    },
+    "save":{
+        "path":"./example/pbc/result"
+    }
+}
