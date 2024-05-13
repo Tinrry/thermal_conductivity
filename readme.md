@@ -27,7 +27,7 @@ phono3py --fc3 --fc2 --dim="1 1 1" --mesh="11 11 11"  --br --tmin=10 --tmax=1000
 will take a while depend on --mesh="11 11 11"
 
 notes:
-根据平台后端仓库：
+2024.5.10：根据平台后端仓库：
 https://github.com/ZJLCompMat/MatCalCore/blob/main/DPA_core/MatCalCore.py#L99
 修改程序，整合成可以与平台后端统一的程序，后续供平台组统一集成。
 修改内容：
@@ -36,3 +36,6 @@ https://github.com/ZJLCompMat/MatCalCore/blob/main/DPA_core/MatCalCore.py#L99
 3. 将文件的读取与保存放在指定的工作目录中
    
   以上程序整合完成后放在另外一个分支:matcalcore.
+
+2024.5.13
+将程序命令行生

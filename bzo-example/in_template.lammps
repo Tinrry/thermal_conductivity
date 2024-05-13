@@ -4,7 +4,7 @@ boundary	p p p
 atom_style	atomic
 neighbor        1.0 bin
 box         tilt large
-read_data   lmp/POSCAR-00<index>.lmp
+read_data   lmp/POSCAR-<index>.lmp
 neigh_modify    every 5 delay 0 check no
 pair_style deepmd graph18-compress0.pb
 pair_coeff * *
@@ -17,5 +17,5 @@ run 0
 print "@ $E"
 shell mkdir output
 shell cd output
-write_dump       all custom BZO-00<index>.dump id type x y z fx fy fz modify sort id element Ba Zr O
+write_dump       all custom BZO-<index>.dump id type x y z fx fy fz modify sort id element Ba Zr O
 shell cd ..

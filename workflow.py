@@ -15,42 +15,58 @@ import json
 
 print_format = '==============='
 
+def step_0(config, dim, mesh):
+    # we need to copy the required files to the working directory
+    print(print_format + 'step 0: copy files' + print_format)
+    save_base = config['save']['path']
+    if os.path.exists(save_base):
+        shutil.rmtree(save_base)
+    os.makedirs(save_base, exist_ok=True)
+    shutil.copy(config['geometry'], save_base)
+    shutil.copy(config['properties']['phono3py']['model'], save_base)
+    shutil.copy(config['properties']['phono3py']['in.lammps'], save_base)
+    os.chdir(save_base)
+
 def step_1(config, dim, mesh):
     print(print_format + 'step 1: phono3py generate POSCAR' + print_format)
     POSCAR = config['properties']['phono3py']['POSCAR']
-    save_base = config['save']['path']
-    poscar_00 = os.path.join(save_base, 'POSCAR-00')
+    # save_base = config['save']['path']
+    # poscar_00 = os.path.join(save_base, 'POSCAR-')
+    poscar_00 = 'POSCAR-'
 
-    command_1 = ["phono3py", "-d", f"--dim={dim}", "-c", POSCAR]
+    command_1 = ["phono3py", "-d", f"--dim='{dim}'", "-c", POSCAR]
+    print(' '.join(command_1))
     p1 = subprocess.Popen(' '.join(command_1), shell=True) # phono3py -d --dim="1 1 1" -c POSCAR_BZO_ROTATION
     p1.wait()
     if os.path.exists(poscar_00):
         shutil.rmtree(poscar_00)
     os.mkdir(poscar_00)
-    # shutil.move("POSCAR-00*", "POSCAR-00/POSCAR-00*")
-    for f in glob.glob(r'POSCAR-00*'):
+    # shutil.move("POSCAR-*", "POSCAR-/POSCAR-*")
+    for f in glob.glob(r'POSCAR-*'):
         shutil.move(f, poscar_00)
     print(print_format + 'step 1: finish' + print_format)
 
 
 def step_2(config, dim, mesh):
     print(print_format + 'step 2: atomsk format poscar to lmp' + print_format)
-    save_base = config['save']['path']
+    # save_base = config['save']['path']
+    save_base = os.getcwd()
     lmp_dir = os.path.join(save_base, 'lmp')
-    poscar_00 = os.path.join(save_base, 'POSCAR-00')
+    poscar_00 = os.path.join(save_base, 'POSCAR-')
 
     if os.path.exists(lmp_dir):
         shutil.rmtree(lmp_dir)
     os.mkdir(lmp_dir)
 
     if not os.path.exists(poscar_00):
-        print('POSCAR-00 is not found.')
+        print('POSCAR- is not found.')
         return
 
     for p, d, files in os.walk(poscar_00):
         for f in files:
             full_f = os.path.join(poscar_00, f)
-            p1 = subprocess.Popen(["atomsk", full_f, "lammps"], shell=True)      # atomsk POSCAR-00/POSCAR-00001 lammps
+            command_1 = ["atomsk", full_f, "lammps"]
+            p1 = subprocess.Popen([' '.join(command_1)], shell=True)      # atomsk POSCAR-/POSCAR-00001 lammps
             p1.wait()
     
     for f in glob.glob(f'{poscar_00}/*lmp'):
@@ -59,20 +75,21 @@ def step_2(config, dim, mesh):
 
 def step_3(config, dim, mesh):
     print(print_format + 'step 3: configure in.lammps' + print_format)
-    save_base = config['save']['path']
+    # save_base = config['save']['path']
+    save_base = os.getcwd()
     lmp_dir = os.path.join(save_base, 'lmp')
-    in_f = config['properties']['in.lammps']
+    in_f = config['properties']['phono3py']['in.lammps']
 
 
     # in_f = 'in_00002.lammps'
     for p, d, files in os.walk(lmp_dir):
         for f in files:
             if f.endswith('.lmp'):
-                base_name = 'POSCAR-00'
+                base_name = 'POSCAR-'
                 index = f.split('.')[0].replace(base_name, '')
                 # index = '001'
                 try:
-                    shutil.copy(in_f, f"{lmp_dir}/in-00{index}.lammps")
+                    shutil.copy(in_f, f"{lmp_dir}/in-{index}.lammps")
                 except:
                     print("in_template.lammps not found")
 
@@ -80,9 +97,9 @@ def step_3(config, dim, mesh):
     for p, d, files in os.walk(lmp_dir):
         for f in files:
             if f.endswith('.lammps'):
-                base_name='in-00'
+                base_name='in-'
                 index = f.split('.')[0].replace(base_name, '')
-                print(base_name, f, index)
+                # print(base_name, f, index)
                 # configure read_data and write_dump
                 old_tag = "<index>"
                 new_tag = index
@@ -93,9 +110,10 @@ def step_3(config, dim, mesh):
     print(print_format + 'step 3: finish' + print_format)
 
 # run deepmd lmp in lmp files , run this command is need wait for a while time. count
-def mpi_run(lmp_dir):
+def mpi_run():
     start_time = timeit.default_timer()
-
+    lmp_dir = os.path.join(os.getcwd(), 'lmp')
+    print(lmp_dir)
     count = 0
     for p, d, files in os.walk(lmp_dir):
         for f in files:
@@ -103,21 +121,22 @@ def mpi_run(lmp_dir):
                 count += 1
                 index = f.split('.')[0].replace('in-', '')
                 command_1 = ["mpirun", "-n", "10", "lmp", "-in", f"{lmp_dir}/{f}", f">lmp-{index}.out", f"2>lmp-{index}.err"]  # mpirun -n 10 lmp -in in-00002.lammps >lmp-00002.out 2>lmp-00002.err
-                # print(' '.join(command_1))
+                print(' '.join(command_1))
                 p = subprocess.Popen([' '.join(command_1)], shell=True)  # mpirun -n 10 lmp -in in-00002.lammps >lmp-00002.out 2>lmp-00002.err
                 p.wait()
 
     end_time = timeit.default_timer()
     print('Running time: %d Seconds.' % (end_time - start_time))
     if count != 0:
-        print('Executed %s times per sample.' % (end_time - start_time) / count)
+        print(f'Executed {(end_time - start_time) / count} times per sample.')
 
 def step_4(config, dim, mesh):
-    save_base = config['save']['path']
+    # save_base = config['save']['path']
+    save_base = os.getcwd()
     lmp_dir = os.path.join(save_base, 'lmp')
 
     print(print_format + 'step 4: run lmp' + print_format)
-    t = threading.Thread(target=mpi_run, args=(lmp_dir))
+    t = threading.Thread(target=mpi_run)
     t.start()
     t.join()
     print(print_format + 'step 4: finish' + print_format)
@@ -155,7 +174,8 @@ def write_xml(fxfyfz, xml_file):
 
 def step_5(config, dim, mesh):
     print(print_format + 'step 5: convert dump to xml' + print_format)
-    save_base = config['save']['path']
+    # save_base = config['save']['path']
+    save_base = os.getcwd()
     # the command in step_4 will generate dump file in output working directory, and we need to convert it to xml file
     xml_dir = os.path.join(save_base, 'output')
     dump_dir = 'output'
@@ -169,8 +189,8 @@ def step_5(config, dim, mesh):
     print(print_format + 'step 5: finish' + print_format)
 
 def step_6(config, dim, mesh ):
-    save_base = config['save']['path']
-
+    # save_base = config['save']['path']
+    save_base = os.getcwd()
     print(print_format + 'step 6: phono3py generate thermal conductivity' + print_format)
     os.chdir(save_base)
 
@@ -189,6 +209,7 @@ def step_6(config, dim, mesh ):
 
 
 def DAG(config, dim, mesh):
+    step_0(config, dim, mesh)
     step_1(config, dim, mesh)
     step_2(config, dim, mesh)
     step_3(config, dim, mesh)
