@@ -1,19 +1,18 @@
 {   
     "geometry": "POSCAR_BZO_ROTATION",
+    "model":"graph18-compress0.pb",
     "properties":{
-        "phono3py":{
+        "thermal-conductivity":{
             "model":"graph18-compress0.pb",
-            "POSCAR":"POSCAR_BZO_ROTATION",
-            "in.lammps":"in_template.lammps",
             "arguments":{
-                "dim--": "2 2 1",
-                "mesh--": "11 11 11",
+                "in_lammps":"in_template.lammps",
+                "cores":10,
                 "dim": "1 1 1",
                 "mesh": "1 1 1"
             }
         }
     },
     "save":{
-        "path":"./example/pbc/result"
+        "path":"./cache"
     }
 }

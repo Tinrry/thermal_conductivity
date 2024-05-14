@@ -23,13 +23,13 @@ def step_0(config, dim, mesh):
         shutil.rmtree(save_base)
     os.makedirs(save_base, exist_ok=True)
     shutil.copy(config['geometry'], save_base)
-    shutil.copy(config['properties']['phono3py']['model'], save_base)
-    shutil.copy(config['properties']['phono3py']['in.lammps'], save_base)
+    shutil.copy(config['properties']['thermal-conductivity']['model'], save_base)
+    shutil.copy(config['properties']['thermal-conductivity']['arguments']['in_lammps'], save_base)
     os.chdir(save_base)
 
 def step_1(config, dim, mesh):
     print(print_format + 'step 1: phono3py generate POSCAR' + print_format)
-    POSCAR = config['properties']['phono3py']['POSCAR']
+    POSCAR = config['geometry']
     # save_base = config['save']['path']
     # poscar_00 = os.path.join(save_base, 'POSCAR-')
     poscar_00 = 'POSCAR-'
@@ -74,11 +74,11 @@ def step_2(config, dim, mesh):
     print(print_format + 'step 2: finish' + print_format)
 
 def step_3(config, dim, mesh):
-    print(print_format + 'step 3: configure in.lammps' + print_format)
+    print(print_format + 'step 3: configure in_lammps' + print_format)
     # save_base = config['save']['path']
     save_base = os.getcwd()
     lmp_dir = os.path.join(save_base, 'lmp')
-    in_f = config['properties']['phono3py']['in.lammps']
+    in_f = config['properties']['thermal-conductivity']['arguments']['in_lammps']
 
 
     # in_f = 'in_00002.lammps'
@@ -93,7 +93,7 @@ def step_3(config, dim, mesh):
                 except:
                     print("in_template.lammps not found")
 
-    # generate in.lammps for deepmd
+    # generate in_lammps for deepmd
     for p, d, files in os.walk(lmp_dir):
         for f in files:
             if f.endswith('.lammps'):
@@ -110,17 +110,21 @@ def step_3(config, dim, mesh):
     print(print_format + 'step 3: finish' + print_format)
 
 # run deepmd lmp in lmp files , run this command is need wait for a while time. count
-def mpi_run():
+def mpi_run(cores=1):
     start_time = timeit.default_timer()
     lmp_dir = os.path.join(os.getcwd(), 'lmp')
     print(lmp_dir)
+    print("run lammps in ", os.getcwd())
     count = 0
     for p, d, files in os.walk(lmp_dir):
         for f in files:
             if f.endswith('.lammps'):
                 count += 1
                 index = f.split('.')[0].replace('in-', '')
-                command_1 = ["mpirun", "-n", "10", "lmp", "-in", f"{lmp_dir}/{f}", f">lmp-{index}.out", f"2>lmp-{index}.err"]  # mpirun -n 10 lmp -in in-00002.lammps >lmp-00002.out 2>lmp-00002.err
+                if cores > 1:
+                    command_1 = ["mpirun", "-n", str(cores), "lmp", "-in", f"{lmp_dir}/{f}", f">lmp-{index}.out", f"2>lmp-{index}.err"]  # mpirun -n 10 lmp -in in-00002.lammps >lmp-00002.out 2>lmp-00002.err
+                else:
+                    command_1 = ["lmp", "-in", f"{lmp_dir}/{f}", f">lmp-{index}.out", f"2>lmp-{index}.err"]  # lmp -in in-00002.lammps >lmp-00002.out 2>lmp-00002.err
                 print(' '.join(command_1))
                 p = subprocess.Popen([' '.join(command_1)], shell=True)  # mpirun -n 10 lmp -in in-00002.lammps >lmp-00002.out 2>lmp-00002.err
                 p.wait()
@@ -136,7 +140,8 @@ def step_4(config, dim, mesh):
     lmp_dir = os.path.join(save_base, 'lmp')
 
     print(print_format + 'step 4: run lmp' + print_format)
-    t = threading.Thread(target=mpi_run)
+    cores = config["properties"]["thermal-conductivity"]["arguments"]["cores"]
+    t = threading.Thread(target=mpi_run, args=(cores,))
     t.start()
     t.join()
     print(print_format + 'step 4: finish' + print_format)
@@ -222,15 +227,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='workflow for thermal conductivity.')
 
     parser.add_argument('-c', '--configure', required=True, help='POSACR file name')
-    parser.add_argument('--dim', type=str, default='2 2 1', help='dim')
-    parser.add_argument('--mesh', type=str, default='11 11 11', help='mesh')
+    # parser.add_argument('--dim', type=str, default='2 2 1', help='dim')
+    # parser.add_argument('--mesh', type=str, default='11 11 11', help='mesh')
     args = parser.parse_args()
 
     f_config = open(args.configure, 'r')
     config = json.load(f_config)
+
+    dim = config["properties"]["thermal-conductivity"]["arguments"]["dim"]
+    mesh = config["properties"]["thermal-conductivity"]["arguments"]["mesh"]
     # this config give you work directory, *.pb, POSCAR_BZO_ROTATION
     # worker(config, dpcal, logger)
-    DAG(config, args.dim, args.mesh)
+    DAG(config, dim, mesh)
     print(print_format + 'workflow: done.' + print_format)
 
 # python workflow.py -c config.json --dim='2 2 1' --mesh='11 11 11'
