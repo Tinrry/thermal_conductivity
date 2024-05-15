@@ -194,21 +194,23 @@ def step_5(config, dim, mesh):
 
 def step_6(config, dim, mesh ):
     # save_base = config['save']['path']
-    save_base = os.getcwd()
+    save_base = os.path.join(os.getcwd(),config['save']['path'])
     print(print_format + 'step 6: phono3py generate thermal conductivity' + print_format)
     os.chdir(save_base)
 
     # 必须使用com_1拼接，否则phono3py的run mode会出现问题
     com_1 = ["phono3py", "--cf3", "output/*.xml"]
+    print("run ", ' '.join(com_1))
     command_1 = subprocess.Popen(' '.join(com_1), shell=True)
     command_1.wait()
 
-    com_2 = ["phono3py", "--sym-fc"]
+    com_2 = ["phono3py", "--sym-fc", "phono3py_disp.yaml"]
+    print("run ", ' '.join(com_2))
     command_2 = subprocess.Popen(' '.join(com_2), shell=True)
     command_2.wait()
 
     # this step will take a long time when set mesh='11 11 11'
-    heat = open('heat.txt', 'w')
+    heat = open('Heat1.txt', 'w')
     heat.flush()
     # 必须有双引号
     run_mode_RTA = ["phono3py", "--fc3", "--fc2", f"--dim=\"{dim}\"", f"--mesh=\"{mesh}\"", "--br", "--tmin=10", "--tmax=1000"]
