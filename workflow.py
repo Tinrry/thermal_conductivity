@@ -19,9 +19,9 @@ def step_0(config, dim, mesh):
     # we need to copy the required files to the working directory
     print(print_format + 'step 0: copy files' + print_format)
     save_base = config['save']['path']
-    if os.path.exists(save_base):
-        shutil.rmtree(save_base)
-    os.makedirs(save_base, exist_ok=True)
+    # if os.path.exists(save_base):
+    #     shutil.rmtree(save_base)
+    os.makedirs(save_base, exist_ok=True)       # if exist, do nothing
     shutil.copy(config['geometry'], save_base)
     shutil.copy(config['properties']['thermal-conductivity']['model'], save_base)
     shutil.copy(config['properties']['thermal-conductivity']['arguments']['in_lammps'], save_base)
@@ -179,7 +179,6 @@ def write_xml(fxfyfz, xml_file):
 
 def step_5(config, dim, mesh):
     print(print_format + 'step 5: convert dump to xml' + print_format)
-    # save_base = config['save']['path']
     save_base = os.getcwd()
     # the command in step_4 will generate dump file in output working directory, and we need to convert it to xml file
     xml_dir = os.path.join(save_base, 'output')
@@ -199,18 +198,24 @@ def step_6(config, dim, mesh ):
     print(print_format + 'step 6: phono3py generate thermal conductivity' + print_format)
     os.chdir(save_base)
 
-    command_1 = subprocess.Popen(["phono3py", "--cf3", "output/*.xml"], shell=True)
+    # 必须使用com_1拼接，否则phono3py的run mode会出现问题
+    com_1 = ["phono3py", "--cf3", "output/*.xml"]
+    command_1 = subprocess.Popen(' '.join(com_1), shell=True)
     command_1.wait()
-    command_2 = subprocess.Popen(["phono3py", "--sym-fc"], shell=True)
+
+    com_2 = ["phono3py", "--sym-fc"]
+    command_2 = subprocess.Popen(' '.join(com_2), shell=True)
     command_2.wait()
+
     # this step will take a long time when set mesh='11 11 11'
     heat = open('heat.txt', 'w')
     heat.flush()
-    run_mode_RTA = ["phono3py", "--fc3", "--fc2", f"--dim={dim}", f"--mesh={mesh}", "--br", "--tmin=10", "--tmax=1000"]
+    # 必须有双引号
+    run_mode_RTA = ["phono3py", "--fc3", "--fc2", f"--dim=\"{dim}\"", f"--mesh=\"{mesh}\"", "--br", "--tmin=10", "--tmax=1000"]
+    print(' '.join(run_mode_RTA))
     command_3 = subprocess.Popen([' '.join(run_mode_RTA)], stdout=heat, stderr=heat, shell=True)
     command_3.wait()
     print(print_format + 'step 6: finish' + print_format)
-
 
 
 def DAG(config, dim, mesh):
@@ -241,4 +246,4 @@ if __name__ == '__main__':
     DAG(config, dim, mesh)
     print(print_format + 'workflow: done.' + print_format)
 
-# python workflow.py -c config.json --dim='2 2 1' --mesh='11 11 11'
+# python workflow.py -c default_pbc.json --dim='2 2 1' --mesh='11 11 11'

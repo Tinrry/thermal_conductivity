@@ -38,4 +38,4 @@ https://github.com/ZJLCompMat/MatCalCore/blob/main/DPA_core/MatCalCore.py#L99
   以上程序整合完成后放在另外一个分支:matcalcore.
 
 2024.5.13
-将程序命令行生
+1.  run ok in branch:matcalcore at zj@10.15.64.44
