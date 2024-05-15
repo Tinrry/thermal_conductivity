@@ -8,6 +8,11 @@ import threading
 import glob
 import argparse
 import json
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
 """
 --dim=2 2 1
 --mesh=11 11 11
@@ -220,6 +225,39 @@ def step_6(config, dim, mesh ):
     print(print_format + 'step 6: finish' + print_format)
 
 
+def read_heat_txt(file):
+    with open(file) as f:
+        lines = f.readlines()
+
+    data = []
+    # 101 datapoint
+    for i, line in enumerate(lines):
+        if line.startswith('#  T(K)        xx         yy         zz         yz         xz         xy  '):
+            print(f'header: {line}')
+
+            data = [x.strip().split() for x in lines[i+1:i+102]]
+            break
+    return np.array(data)
+
+def step_7(config, dim, mesh):
+    csv_file = 'Heat1.csv'
+    if not os.path.exists(csv_file):
+        data = read_heat_txt('Heat1.txt')
+        df = pd.DataFrame(data, columns=['T(K)', 'xx', 'yy', 'zz', 'yz', 'xz', 'xy'])
+        df.to_csv(csv_file, index=False)
+    else:
+        df = pd.read_csv(csv_file, header=0)
+    
+        plt.plot(df['T(K)'][1:], df['xx'][1:], label='xx')
+        plt.plot(df['T(K)'][1:], df['yy'][1:], label='yy')
+        plt.plot(df['T(K)'][1:], df['zz'][1:], label='zz')
+        plt.plot(df['T(K)'][1:], df['yz'][1:], label='yz')
+        plt.plot(df['T(K)'][1:], df['xz'][1:], label='xz')
+        plt.plot(df['T(K)'][1:], df['xy'][1:], label='xy')
+        plt.legend()
+        plt.savefig('img.png', dpi=300, bbox_inches='tight')
+
+    
 def DAG(config, dim, mesh):
     step_0(config, dim, mesh)
     step_1(config, dim, mesh)
@@ -228,6 +266,7 @@ def DAG(config, dim, mesh):
     step_4(config, dim, mesh)
     step_5(config, dim, mesh)
     step_6(config, dim, mesh)
+    step_7(config, dim, mesh)
 
     
 if __name__ == '__main__':
@@ -248,4 +287,4 @@ if __name__ == '__main__':
     DAG(config, dim, mesh)
     print(print_format + 'workflow: done.' + print_format)
 
-# python workflow.py -c default_pbc.json --dim='2 2 1' --mesh='11 11 11'
+# python workflow.py -c default_pbc.json
