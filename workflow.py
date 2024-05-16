@@ -264,24 +264,24 @@ def step_7(config, dim, mesh):
     else:
         df = pd.read_csv(csv_file, header=0)
     
-        plt.plot(df['T(K)'][1:], df['xx'][1:], label='xx')
-        plt.plot(df['T(K)'][1:], df['yy'][1:], label='yy')
-        plt.plot(df['T(K)'][1:], df['zz'][1:], label='zz')
-        plt.plot(df['T(K)'][1:], df['yz'][1:], label='yz')
-        plt.plot(df['T(K)'][1:], df['xz'][1:], label='xz')
-        plt.plot(df['T(K)'][1:], df['xy'][1:], label='xy')
-        plt.legend()
-        plt.savefig('img.png', dpi=300, bbox_inches='tight')
+    plt.plot(df['T(K)'][1:], df['xx'][1:], label='xx')
+    plt.plot(df['T(K)'][1:], df['yy'][1:], label='yy')
+    plt.plot(df['T(K)'][1:], df['zz'][1:], label='zz')
+    plt.plot(df['T(K)'][1:], df['yz'][1:], label='yz')
+    plt.plot(df['T(K)'][1:], df['xz'][1:], label='xz')
+    plt.plot(df['T(K)'][1:], df['xy'][1:], label='xy')
+    plt.legend()
+    plt.savefig('img.png', dpi=300, bbox_inches='tight')
 
     
 def DAG(config, dim, mesh):
-    step_0(config, dim, mesh)
-    step_1(config, dim, mesh)
-    step_2(config, dim, mesh)
-    step_3(config, dim, mesh)
-    step_4(config, dim, mesh)
-    step_5(config, dim, mesh)
-    step_6(config, dim, mesh)
+    # step_0(config, dim, mesh)
+    # step_1(config, dim, mesh)
+    # step_2(config, dim, mesh)
+    # step_3(config, dim, mesh)
+    # step_4(config, dim, mesh)
+    # step_5(config, dim, mesh)
+    # step_6(config, dim, mesh)
     step_7(config, dim, mesh)
 
     
