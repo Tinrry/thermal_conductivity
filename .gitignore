@@ -1,8 +1,7 @@
 # the system files
 .DS_Store
 .idea/
-
- graph18-compress0.pb
- ./upload.sh
- # other topic about zhang
- ref-2/
+graph18-compress0.pb
+upload.sh
+# other topic about zhang
+ref-2/
