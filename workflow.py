@@ -236,7 +236,7 @@ def read_heat_txt(file):
     # ended with words
     for i, line in enumerate(lines):
         if end_read:
-            continue
+            break
         stripped_line = line.strip()
         if stripped_line.startswith('#  T(K)'):
             print(f'header: {stripped_line}')
