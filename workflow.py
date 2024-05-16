@@ -275,13 +275,13 @@ def step_7(config, dim, mesh):
 
     
 def DAG(config, dim, mesh):
-    # step_0(config, dim, mesh)
-    # step_1(config, dim, mesh)
-    # step_2(config, dim, mesh)
-    # step_3(config, dim, mesh)
-    # step_4(config, dim, mesh)
-    # step_5(config, dim, mesh)
-    # step_6(config, dim, mesh)
+    step_0(config, dim, mesh)
+    step_1(config, dim, mesh)
+    step_2(config, dim, mesh)
+    step_3(config, dim, mesh)
+    step_4(config, dim, mesh)
+    step_5(config, dim, mesh)
+    step_6(config, dim, mesh)
     step_7(config, dim, mesh)
 
     
