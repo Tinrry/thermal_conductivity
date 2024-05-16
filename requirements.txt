@@ -1,0 +1,16 @@
+ase==3.22.1
+deepmd-kit @ file:///home/conda/feedstock_root/build_artifacts/deepmd-kit_1660885578554/work
+matplotlib==3.6.0
+matplotlib-inline==0.1.6
+numpy==1.22.4
+pandas==2.0.0
+phono3py @ file:///home/conda/feedstock_root/build_artifacts/phono3py_1672457645512/work
+phonopy @ file:///home/conda/feedstock_root/build_artifacts/phonopy_1678092335696/work
+pickleshare==0.7.5
+Pillow==9.2.0
+plotly==5.14.1
+tensorboard @ file:///home/builder/stiwari/miniconda3/envs/tf_new_env/conda-bld/tensorboard_1661447826088/work/tensorboard-2.9.0-py3-none-any.whl
+tensorboard-data-server @ file:///tmp/build/80754af9/tensorboard-data-server_1633034767313/work/tensorboard_data_server-0.6.0-py3-none-manylinux2010_x86_64.whl
+tensorboard-plugin-wit @ file:///home/builder/tkoch/workspace/tensorflow/tensorboard-plugin-wit_1658918494740/work/tensorboard_plugin_wit-1.8.1-py3-none-any.whl
+tensorflow @ file:///home/conda/feedstock_root/build_artifacts/tensorflow-split_1653111936369/work/tensorflow_pkg/tensorflow-2.9.0-cp39-cp39-linux_x86_64.whl
+tensorflow-estimator @ file:///home/builder/stiwari/miniconda3/envs/tf_new_env/conda-bld/tensorflow-estimator_1661448080217/work/tensorflow_estimator-2.9.0-py2.py3-none-any.whl

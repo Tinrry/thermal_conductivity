@@ -39,3 +39,14 @@ https://github.com/ZJLCompMat/MatCalCore/blob/main/DPA_core/MatCalCore.py#L99
 
 2024.5.13
 1.  run ok in branch:matcalcore at zj@10.15.64.44
+
+2024.5.16
+1. 毕老师整理default_pbc.json中的参数结构
+2. 毕老师修改了bug
+```
+    # com_2_251 = ["phono3py", "--sym-fc"]  # phono3py版本2.5.1
+    com_2_303 = ["phono3py", "--sym-fc", "phono3py_disp.yaml"]  #phono3py版本3.0.3
+
+```
+3. 将heat-plot功能放到workflow.py中的step_7
+4. 增加requirements.txt， 显示了程序运行环境下的部分python package版本。

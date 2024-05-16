@@ -198,8 +198,7 @@ def step_5(config, dim, mesh):
     print(print_format + 'step 5: finish' + print_format)
 
 def step_6(config, dim, mesh ):
-    # save_base = config['save']['path']
-    save_base = os.path.join(os.getcwd(),config['save']['path'])
+    save_base = os.getcwd()     # because we change the working directory in step_0
     print(print_format + 'step 6: phono3py generate thermal conductivity' + print_format)
     os.chdir(save_base)
 
@@ -208,10 +207,11 @@ def step_6(config, dim, mesh ):
     print("run ", ' '.join(com_1))
     command_1 = subprocess.Popen(' '.join(com_1), shell=True)
     command_1.wait()
-
-    com_2 = ["phono3py", "--sym-fc", "phono3py_disp.yaml"]
+    
+    # com_2_251 = ["phono3py", "--sym-fc"]
+    com_2_303 = ["phono3py", "--sym-fc", "phono3py_disp.yaml"]
     print("run ", ' '.join(com_2))
-    command_2 = subprocess.Popen(' '.join(com_2), shell=True)
+    command_2 = subprocess.Popen(' '.join(com_2_303), shell=True)
     command_2.wait()
 
     # this step will take a long time when set mesh='11 11 11'
