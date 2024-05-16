@@ -230,13 +230,29 @@ def read_heat_txt(file):
         lines = f.readlines()
 
     data = []
-    # 101 datapoint
+    start_read = False
+    end_read = False
+    # data started with '#  T(K)'
+    # ended with words
     for i, line in enumerate(lines):
-        if line.startswith('#  T(K)        xx         yy         zz         yz         xz         xy  '):
-            print(f'header: {line}')
-
-            data = [x.strip().split() for x in lines[i+1:i+102]]
-            break
+        if end_read:
+            continue
+        stripped_line = line.strip()
+        if stripped_line.startswith('#  T(K)'):
+            print(f'header: {stripped_line}')
+            headers = stripped_line.strip().split()[1:]
+            data.append(headers)
+            start_read = True
+            continue
+        if start_read:
+            # print(f'start read {stripped_line}')
+            if (len(stripped_line) == 0): # empty line
+                continue
+            elif stripped_line[0].isdigit():
+                data.append(stripped_line.strip().split())
+            else: 
+                # stop to read
+                end_read = True
     return np.array(data)
 
 def step_7(config, dim, mesh):
