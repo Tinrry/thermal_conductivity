@@ -10,8 +10,11 @@ in_template.lammps # 运行自动流程脚本需要
 1. 热导计算，输出heat.txt
 ```python workflow.py```
 2. 基于heat.txt，结果展示
-```python heat-plot.py
+   
 ```
+python heat-plot.py
+```
+
 ![h-p](./img.png)
 
 ## 程序运行的过程解释和说明
