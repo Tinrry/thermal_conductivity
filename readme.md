@@ -26,3 +26,7 @@ phono3py --fc3 --fc2 --dim="1 1 1" --mesh="11 11 11"  --br --tmin=10 --tmax=1000
 
 will take a while depend on --mesh="11 11 11"
 
+
+## bayesian implement
+1. txt文件的数据格式转成csv
+2. 理解，什么是target， pymc3中的结构，将 bayesian 代码用pymc3实现。
