@@ -28,5 +28,10 @@ will take a while depend on --mesh="11 11 11"
 
 
 ## bayesian implement
+为了避免混乱，把这部分代码放在bayesian目录下。
 1. txt文件的数据格式转成csv
+   ```
+   python dataset.py
+   ```
+  ![alt text](image.png)
 2. 理解，什么是target， pymc3中的结构，将 bayesian 代码用pymc3实现。
