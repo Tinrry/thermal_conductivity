@@ -1,45 +1,41 @@
 import pandas as pd
-
-def read_txt_and_save_to_csv(txt_file, csv_file):
-    df = pd.read_csv(txt_file, delimiter='\t')  
-    df.to_csv(csv_file, index=False)
-
-# Example usage
-txt_files = ['phi_100.txt', 'y_100.txt']
-csv_files = ['phi_100.csv', 'y_100.csv']
-for txt_file, csv_file in zip(txt_files, csv_files):
-    read_txt_and_save_to_csv(txt_file, csv_file)
-    print(f'{txt_file} has been converted to {csv_file}')
-
-
 import numpy as np
-import pandas as pd
-import pymc3 as pm
-import scipy.stats as stats
 
-# Step 1: Load the material dataset
-data = pd.read_csv('material_data.csv')
-phi = data['phi'].values
-energies = data['energies'].values
+FEATURE_SIZE = 18
 
-# Step 2: Define the prior distributions
-with pm.Model() as model:
-    weight_phi = pm.Normal('weight_phi', mu=0, sd=10)
-    weight_energies = pm.Normal('weight_energies', mu=0, sd=10)
-    intercept = pm.Normal('intercept', mu=0, sd=10)
+def read_txt_and_save_to_csv(feature_file, energy_file,  csv_file):
+    header_name = ['energy']
+    for i in range(FEATURE_SIZE):
+        header_name.append(f'phi_{i}')
+    print(f'header_name: {header_name[:]}')
 
-    # Step 3: Define the likelihood function
-    mu = intercept + weight_phi * phi + weight_energies * energies
-    sigma = pm.HalfNormal('sigma', sd=10)
-    likelihood = pm.Normal('likelihood', mu=mu, sd=sigma, observed=data['target'])  # Assuming 'target' is the observed variable
+    df_f = pd.read_csv(feature_file, delimiter=' ', dtype=np.float64, header=None)
 
-    # Step 4: Calculate the posterior distribution
-    trace = pm.sample(1000, return_inferencedata=False)
+    df_e = pd.read_csv(energy_file, delimiter=' ', dtype=np.float64) 
 
-# Step 5: Estimate the weights
-estimated_weight_phi = np.mean(trace['weight_phi'])
-estimated_weight_energies = np.mean(trace['weight_energies'])
+    df = pd.concat([df_e, df_f], axis=1)
+    print(df_f.shape)
+    print(df)
 
-# Print the estimated weights
-print("Estimated weight of phi:", estimated_weight_phi)
-print("Estimated weight of energies:", estimated_weight_energies)
+    df.to_csv(csv_file, index=False, header=header_name)
+
+
+import re
+
+def convert_space_CRLF2LF(input_file, output_file):
+    # CRLF:\r\n为Windows格式txt, LF：\n为linux的换行格式
+    with open(input_file, 'r', newline='\r\n') as infile:
+        contents = infile.readlines()
+        contents = [re.sub(' +', ' ', content).strip().split() for content in contents]
+        print(f'contents {contents}')
+    with open(output_file, 'w', newline='\n') as outfile:
+        for content in contents:
+            outfile.write(' '.join(content) + '\n')
+
+# 浮点数精度问题,精度损失
+# 使用示例
+input_file = 'phi_100.txt'  # 原始文件路径
+output_file = 'phi_100_converted.txt'  # 输出文件路径
+convert_space_CRLF2LF(input_file, output_file)
+df = pd.read_csv(output_file, delimiter=' ', dtype=np.float64, header=None)
+print(df)
