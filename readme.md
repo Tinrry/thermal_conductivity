@@ -34,4 +34,8 @@ will take a while depend on --mesh="11 11 11"
    python dataset.py
    ```
   ![alt text](image.png)
-2. 理解，什么是target， pymc3中的结构，将 bayesian 代码用pymc3实现。
+1. 将 bayesian 代码用pymc3实现。
+   ```
+   python lr_poly.py
+   ```
+   ![alt text](image-1.png)
