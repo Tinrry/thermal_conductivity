@@ -2,10 +2,11 @@ import pandas as pd
 import pymc3 as pm
 
 # Read the data from data.csv
-data = pd.read_csv('./data.csv', sep=' ', header=0)
+data = pd.read_csv('./data_20240529.csv', header=0)
 
 # Define the variables
-x = data[['phi_0', 'phi_1', 'phi_2', 'phi_3', 'phi_4', 'phi_5', 'phi_6', 'phi_7', 'phi_8', 'phi_9', 'phi_10', 'phi_11', 'phi_12', 'phi_13', 'phi_14', 'phi_15', 'phi_16', 'phi_17']]
+x = data[['phi_0', 'phi_1', 'phi_2', 'phi_3', 'phi_4', 'phi_5', 'phi_6', 'phi_7', 
+          'phi_8', 'phi_9', 'phi_10', 'phi_11', 'phi_12', 'phi_13', 'phi_14', 'phi_15', 'phi_16', 'phi_17']]
 y = data['energy']
 print(x.describe())
 
