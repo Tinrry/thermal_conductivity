@@ -3,6 +3,7 @@
 ```
    pip install numpy, pandas, pymc3, re
 ```
+## 使用
 为了避免混乱，把这部分代码放在bayesian目录下。
 1. txt文件的数据格式转成csv
    在dataset.py中修改输入的txt文件，指定转换后的csv文件名称。
