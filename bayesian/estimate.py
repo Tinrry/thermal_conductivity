@@ -35,7 +35,7 @@ print('sigma_sd: ', sigma_sd)
 # print(pm.summary(trace))
 
 # Save the trace to a file
-pm.save_trace(trace, 'trace')
+pm.save_trace(trace, 'trace', overwrite=True)
 
 
 # trace_df = pm.trace_to_dataframe(trace)
