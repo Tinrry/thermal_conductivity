@@ -23,13 +23,7 @@ with pm.Model() as model:
     sigma = pm.HalfNormal('sigma', sd=1)
     likelihood = pm.Normal('y', mu=mu, sd=sigma, observed=y)
 
-    # Load the trace from the file
-    trace = pm.load_trace('trace')
-
-    # Inference
-    # 通过增加 tune 参数的值来增加调优步骤的数量。调优步骤在实际采样开始之前进行，用于调整采样器的参数以提高采样效率。
-    trace = pm.sample(2000, tune=5000, cores=1, target_accept=0.9,
-                      start=trace.points[-1] if 'trace' in locals() else None)
+    trace = pm.sample(2000, tune=5000, cores=1, target_accept=0.9)
 
 # get beta sd and sigma sd from the trace
 beta_sd = trace['beta'].std(axis=0)

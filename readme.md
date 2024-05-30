@@ -1,7 +1,7 @@
 # bayesian implement
 ## 安装
 ```
-   pip install numpy, pandas, pymc3, re
+   pip install numpy pandas pymc3
 ```
 ## 使用
 为了避免混乱，把这部分代码放在bayesian目录下。
