@@ -6,3 +6,4 @@ upload.sh
 # other topic about zhang
 ref/
 bayesian/*.txt
+**/__pycache__/

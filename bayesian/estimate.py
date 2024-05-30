@@ -23,8 +23,43 @@ with pm.Model() as model:
     sigma = pm.HalfNormal('sigma', sd=1)
     likelihood = pm.Normal('y', mu=mu, sd=sigma, observed=y)
 
-    # Inference
-    trace = pm.sample(2000, tune=1000, cores=1)
+    # Load the trace from the file
+    trace = pm.load_trace('trace')
 
-# Print the summary of the trace
-print(pm.summary(trace))
+    # Inference
+    # 通过增加 tune 参数的值来增加调优步骤的数量。调优步骤在实际采样开始之前进行，用于调整采样器的参数以提高采样效率。
+    trace = pm.sample(2000, tune=5000, cores=1, target_accept=0.9,
+                      start=trace.points[-1] if 'trace' in locals() else None)
+
+# get beta sd and sigma sd from the trace
+beta_sd = trace['beta'].std(axis=0)
+sigma_sd = trace['sigma'].std()
+print('beta_sd: ', beta_sd)
+print('sigma_sd: ', sigma_sd)
+
+# # Print the summary of the trace
+# print(pm.summary(trace))
+
+# Save the trace to a file
+pm.save_trace(trace, 'trace')
+
+
+# trace_df = pm.trace_to_dataframe(trace)
+# trace_df.to_csv('trace.csv', index=False)
+
+# import matplotlib.pyplot as plt
+
+# # Plot the trace
+# pm.traceplot(trace)
+# plt.show()
+
+# # Plot the posterior distribution
+# pm.plot_posterior(trace)
+# plt.show()
+
+# # Plot the posterior distribution of the coefficients
+# pm.plot_posterior(trace, var_names=['alpha', 'beta'])
+# plt.show()
+
+from utils import get_parameters_variance
+variance = get_parameters_variance(x,  beta_sd, sigma_sd)

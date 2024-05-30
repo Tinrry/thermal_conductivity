@@ -14,6 +14,8 @@
    ```
    ![alt text](image-2.png)
 
+   有2540条数据，数据的相关信息意义参考：
+
 1. 将 bayesian 代码用pymc3实现。
    在estimate.py中修改输入的csv文件
    ![alt text](image-3.png)
