@@ -1,0 +1,14 @@
+prt_model = 0
+ngqpt = 8 8 8
+dipdip  = 1   
+ncell = 2 2 2
+fit_coeff = 0 
+dynamics = 13
+ntime  = 1000
+nctime = 1
+temperature = 15
+dtion =  30  
+strtarget = 3*0 3*0 
+restartxf = -3
+optcell =  2
+
